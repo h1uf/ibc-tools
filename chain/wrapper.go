@@ -368,6 +368,18 @@ func (cw *ChainWrapper) GetNumberOfPacketCommitmentsAndLastSeq(chanel, port stri
 	return len(comms.Commitments), uint64(seq)
 }
 
+func (cw *ChainWrapper) IsPacketAcknowledged(chanel, port string, seq uint64) bool {
+	latestHeight, err := cw.chainClient.ChainProvider.QueryLatestHeight(cw.Context())
+	utils.HandleError(err)
+	ack, err := cw.chainClient.ChainProvider.QueryPacketAcknowledgement(cw.Context(), latestHeight, chanel, port, seq)
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+
+	return len(ack.Acknowledgement) > 0 && len(ack.Proof) > 0
+}
+
 func (cw *ChainWrapper) IsPacketReceived(chanel, port string, seq uint64) bool {
 	latestHeight, err := cw.chainClient.ChainProvider.QueryLatestHeight(cw.Context())
 	utils.HandleError(err)
